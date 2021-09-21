@@ -1,0 +1,38 @@
+version: '2'
+
+volumes:
+  settings:                          # Only required if using PERSISTENT flag (see below)
+
+services:
+
+  browser:
+    image: balenablocks/browser
+    privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
+    network_mode: host
+    ports:
+        - '5011' # management API (optional)
+        - '35173' # Chromium debugging port (optional)
+    volumes:
+      - 'settings:/data' # Only required if using PERSISTENT flag (see below)
+  audio:
+    image: balenablocks/audio
+    privileged: true
+    ports:
+      - 4317:4317
+    environment:
+      AUDIO_OUTPUT: RPI_HEADPHONES
+  hostname:
+    image: balenablocks/hostname
+    restart: no                               # Required to avoid container restarting indefinitely
+    labels:
+      io.balena.features.supervisor-api: 1    # Required to interact with the supervisor
+    environment:
+      SET_HOSTNAME: paradise-dash
+  browsercontrol:
+    image: balenablocks/browsercontrol
+    restart: always
+    network_mode: host
+    privileged: true
+    ports:
+      - 80:80
+    
